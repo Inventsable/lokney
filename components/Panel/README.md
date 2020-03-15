@@ -1,6 +1,8 @@
 ## Panel
 
-Wrapper which handles dynamic script loading, host app UI theme and events, scrollbar styling, CSInterface and more. This component is best used as the direct child of `#app` or parent of a `<router-view>`. Includes `starlette`, `CEP-Spy`, and `cluecumber` utilities.
+Wrapper which handles dynamic script loading, host app UI theme and events, fitting content within, scrollbar styling, CSInterface and more. This component is best used as the direct child of `#app` or parent of a `<router-view>`. Includes [starlette](https://github.com/Inventsable/starlette), [CEP-Spy](https://github.com/Inventsable/cep-spy), and script running utilities.
+
+> **NOTE:** This component requires having loaded CSInterface.js prior to mounting.
 
 ```html
 <!-- In App.js or any router page -->

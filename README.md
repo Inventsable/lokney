@@ -3,6 +3,27 @@
 Vue utility components for Adobe CEP panels to greatly simplify the overhead of Adobe specific coding.
 
 ```html
+<div id="app">
+  <Panel script-path="['./host/myScript.jsx', './host/anotherScript.jsx']">
+    <div id="content"></div>
+  </Panel>
+  <Menus debug refresh
+    :context="[
+      {
+        label: 'This is a disabled menu item',
+        enabled: false
+      },
+      {
+        label: 'This activates a method within this file on clicking this item',
+        enabled: true,
+        callback: this.localMethod
+      }
+    ]"
+  />
+</div>
+```
+
+```html
 <!-- Within a given App.vue, with no need for methods or data inside <script> -->
 <div id="app">
   <!-- Path to script can be specified as attribute, supporting multiple files -->
@@ -11,7 +32,8 @@ Vue utility components for Adobe CEP panels to greatly simplify the overhead of 
     <div id="content"></div>
   </Panel>
   <!-- 
-    Menus can be anywhere in your code, even per router page. Add props like "debug" and "refresh" to easily append launching debug port and refreshing your extension to context and flyout menus.
+    Menus can be anywhere in your code, even per router page. Add props like "debug" and "refresh" to easily 
+    append launching debug port and refreshing your extension to context and flyout menus.
 
     Any change to a :context or :flyout Array will automatically rebuild the given menu and update instantly.
   -->
@@ -65,8 +87,8 @@ Vue.use('Menu', Menu);
 
 // Include imports above Vue initialization
 new Vue({
-	router,
-	render: h => h(App)
+  router,
+  render: h => h(App)
 }).$mount("#app");
 ```
 
@@ -89,7 +111,7 @@ export default {
 
 ## Components
 
-### - [Panel]()
-### - [Menus]()
+### - [Panel](https://github.com/Inventsable/lokney/tree/master/components/Panel)
+### - [Menus](https://github.com/Inventsable/lokney/tree/master/components/Menus)
 
 
