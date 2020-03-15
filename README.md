@@ -17,8 +17,20 @@ Vue utility components for Adobe CEP panels to greatly simplify the overhead of 
       },
       {
         label: 'This activates a method within this file on clicking this item',
-        enabled: true,
         callback: this.localMethod
+      }
+    ]"
+    :flyout="[
+      {
+        label: 'This flyout menu has a JSON structure!',
+      },
+      {
+        label: 'Supporting infinite nesting!',
+        menu: [
+          {
+            label: 'Hello world!'
+          }
+        ]
       }
     ]"
   />
