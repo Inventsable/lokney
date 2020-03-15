@@ -1,4 +1,6 @@
-# lokney
+# lokney [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+[![NPM](https://nodei.co/npm/lokney.png)](https://nodei.co/npm/lokney/)
 
 Vue utility components for Adobe CEP panels to greatly simplify the overhead of Adobe specific coding.
 

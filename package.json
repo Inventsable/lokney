@@ -1,7 +1,7 @@
 {
   "name": "lokney",
   "version": "1.0.0",
-  "description": "",
+  "description": "Vue utility components for Adobe CEP panels to greatly simplify the overhead of Adobe specific coding.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,5 +12,14 @@
   "dependencies": {
     "cep-spy": "^1.1.11",
     "starlette": "^1.0.2"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Inventsable/lokney.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Inventsable/lokney/issues"
+  },
+  "homepage": "https://github.com/Inventsable/lokney#readme"
 }
