@@ -94,10 +94,10 @@ npm install lokney
 ### Within `./src/main.js` (use anywhere in project with no need to import per component file):
 
 ```js
-import { Panel, Menu } from 'lokney'
+import { Panel, Menus } from 'lokney'
 
 Vue.use('Panel', Panel);
-Vue.use('Menu', Menu);
+Vue.use('Menus', Menus);
 
 // Include imports above Vue initialization
 new Vue({
