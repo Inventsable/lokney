@@ -71,7 +71,7 @@ Menus contain only `Launch Localhost` and `Reload Panel`:
   <Menus refresh debug />
 ```
 
-Menus contain reload and a custom context menu, passing an event to a local method each time the context menu is clicked. Note that `this.doSomething` is called for both menu items, though the second item will trigger `this.localMethod` after the `@contextClick` event.
+Menus contain reload and a custom context menu, passing an event to a local method each time the context menu is clicked. Note that `this.doSomething` is called for both menu items, though the last item will trigger `this.localMethod` after the `@contextClick` event.
 ```html
 <Menus refresh
   @contextClick="this.doSomething"
@@ -101,8 +101,8 @@ Context menu contains a menu item with icon, then a divider, then a nested menu 
 <Menus
   :context="[
     {
-      label: 'Icon',
-      icon: './src/assets/timelineContextMenu.png'
+      label: 'Menu item has a custom icon',
+      icon: './src/assets/MyMenuIcon.png'
     },
     { label: '---' },
     {
@@ -128,9 +128,7 @@ The above could be done much better with a computed property like so, which will
 
 
 ```html
-<Menu 
-  :flyout="flyoutMenu"
-/>
+<Menu :flyout="flyoutMenu" />
 ```
 
 ```html
