@@ -1,6 +1,6 @@
 <template>
-  <div class="panel">
-    <slot style="overflow:hidden;" />
+  <div class="panel" :style="checkPanelHeight()">
+    <slot style="overflow: hidden;" />
   </div>
 </template>
 
@@ -11,56 +11,61 @@ const spy = window.__adobe_cep__ ? require("cep-spy").default : null;
 const fs = require("fs");
 const path = require("path");
 import starlette from "starlette";
+import { evalScript } from "cluecumber";
 
 export default {
   props: {
     utils: {
       type: [String, Array],
-      default: "./src/host/universal/"
+      default: "./src/host/universal/",
     },
     scriptPath: {
       type: [String, Array],
-      default: "./src/host/[appName]"
+      default: "./src/host/[appName]",
     },
     exclude: {
       type: [String, Array],
-      default: ""
+      default: "",
     },
     noUtils: {
       type: Boolean,
-      default: false
+      default: false,
     },
     app: {
       type: String,
-      default: "AEFT"
+      default: "AEFT",
     },
     theme: {
       type: String,
-      default: "gradient"
+      default: "gradient",
     },
     gradient: {
       type: String,
-      default: ""
+      default: "",
+    },
+    fontSize: {
+      type: String,
+      default: '10px';
     }
   },
   data: () => ({
     validFile: /\.js(x(bin)?|(fl))?$/,
     themeForcer: null,
     debug: false,
-    csInterface: null
+    csInterface: null,
   }),
   computed: {
     realUtils() {
       return typeof this.utils === "string"
         ? this.sanitizeString(this.utils)
-        : this.utils.map(util => {
+        : this.utils.map((util) => {
             this.sanitizeString(util);
           });
     },
     realScriptPath() {
       return typeof this.scriptPath === "string"
         ? this.sanitizeString(this.scriptPath)
-        : this.scriptPath.map(script => {
+        : this.scriptPath.map((script) => {
             this.sanitizeString(script);
           });
     },
@@ -73,22 +78,16 @@ export default {
         ? new RegExp(this.exclude)
         : new RegExp(
             `${this.exclude
-              .map(item => {
+              .map((item) => {
                 return escape(item);
               })
               .join("|")}`
           );
-    }
+    },
   },
   created() {
-    this.csInterface = spy ? new CSInterface() : null;
     window.localStorage.setItem("starletteActive", false);
-    // if (spy && spy.appName == "FLPT") {
-    // 	window.localStorage.setItem("starletteActive", true);
-    // } else if (!spy) window.localStorage.setItem("starletteActive", false);
-    if (this.csInterface) starlette.init();
-
-    console.log(window.localStorage.getItem("activeTheme"));
+    if (spy) starlette.init();
   },
   async mounted() {
     if (spy) {
@@ -97,10 +96,15 @@ export default {
         `${spy.extName} ${spy.extVersion} : ${spy.isDev ? "DEV" : "BUILD"}`
       );
     }
+    if (window.__adobe_cep__) {
+      this.csInterface = new CSInterface();
+      this.csInterface.addEventListener("console", this.consoler);
+    }
+
     // dont redirect if file dropped
     window.addEventListener(
       "dragover",
-      function(e) {
+      function (e) {
         e = e || event;
         e.preventDefault();
       },
@@ -108,7 +112,7 @@ export default {
     );
     window.addEventListener(
       "drop",
-      function(e) {
+      function (e) {
         e = e || event;
         e.preventDefault();
       },
@@ -117,24 +121,60 @@ export default {
     if (window.__adobe_cep__ && !this.debug) {
       await this.loadUtils();
       await this.loadScriptPath();
+    } else if (this.app && this.theme) {
+      this.parseWebTheme();
     }
+    document.body.style.overflow = "auto";
+    this.checkSize();
+    window.addEventListener("resize", () => {
+      this.checkSize();
+    });
+    this.setCSS('--font-size', this.fontSize);
   },
   methods: {
+    checkSize() {
+      if (window.orientation !== undefined) {
+        if (window.innerWidth > window.innerHeight) {
+          this.setCSS("font-size", "10px");
+        } else {
+          this.setCSS("font-size", "12px");
+        }
+      } else {
+        this.setCSS("font-size", "10px");
+      }
+    },
+    errorMessage() {
+      console.error(
+        `Brutalism requires CSInterface to function. Make sure to add a version of CSInterface to your panel's base index.html!\r\nSee an example index.html setup here: https://github.com/Inventsable/forte/blob/master/public/index.html#L8-L11`
+      );
+    },
+    checkPanelHeight() {
+      return `height: ${
+        document.querySelector(".tabs-wrapper")
+          ? `calc(100vh - 32px);`
+          : `100vh;`
+      }`;
+    },
     parseWebTheme() {
       let app =
-        this.app || (this.$route.params && this.$route.params.app)
-          ? this.$route.params.app
-          : "";
+        this.app ||
+        (this.$route && this.$route.params && this.$route.params.app)
+          ? this.app || this.$route.params.app
+          : "ILST";
       let theme =
         this.theme || (this.$route.params && this.$route.params.theme)
-          ? this.$route.params.theme
-          : "";
+          ? this.theme || this.$route.params.theme
+          : "darkest";
       let gradient = this.gradient || "";
       if (/\d/.test(theme) && !gradient.length) {
         gradient = +theme >= 100 ? 100 : +theme <= 0 ? 0 : +theme;
         theme = "gradient";
       }
-      starlette.initAs(app, theme, gradient);
+      try {
+        starlette.initAs(app, theme, gradient);
+      } catch (err) {
+        //
+      }
     },
     removeRelativePrefix(thispath) {
       return /^\.\//.test(thispath) && spy
@@ -179,19 +219,21 @@ export default {
         });
       });
     },
-    loadScript(loadPath) {
+    async loadScript(loadPath) {
       if (!this.noExclusion && this.realExcludes.test(loadPath))
         return console.log(`Excluding ${loadPath}`);
-
       console.log(`Loading ${loadPath}`);
-      // Correctly loads a script regardless of whether Animate or regular CEP app
-      if (spy && !/FLPR/.test(spy.appName) && window.__adobe_cep__) {
-        // window.__adobe_cep__.evalScript(`$.evalFile('${loadPath}')`)
-        this.csInterface.evalScript(`$.evalFile('${loadPath}')`);
-      } else if (window.__adobe_cep__)
-        this.csInterface.evalScript(
-          `fl.runScript(FLfile.platformPathToURI("${loadPath}"))`
-        );
+      try {
+        // Correctly loads a script regardless of whether Animate or regular CEP app
+        if (spy && !/FLPR/.test(spy.appName) && window.__adobe_cep__) {
+          await evalScript(`$.evalFile('${loadPath}')`);
+        } else if (window.__adobe_cep__)
+          await evalScript(
+            `fl.runScript(FLfile.platformPathToURI("${loadPath}"))`
+          );
+      } catch (err) {
+        this.errorMessage(err);
+      }
     },
     sanitizeString(str) {
       return this.replaceSpyVariables(
@@ -203,7 +245,7 @@ export default {
         ? null
         : typeof this.realUtils === "string"
         ? await this.handlePath(this.realUtils)
-        : this.realUtils.forEach(util => {
+        : this.realUtils.forEach((util) => {
             this.handlePath(util);
           });
     },
@@ -237,21 +279,19 @@ export default {
         : await this.handleFile(thispath);
     },
     async handleFile(thispath) {
-      if (this.validFile.test(thispath)) this.loadScript(thispath);
+      if (this.validFile.test(thispath)) await this.loadScript(thispath);
       else throw new Error(`${thispath} is not a valid scripting file`);
     },
     async loadFolder(thispath) {
       let contents = await this.readDir(thispath);
-      contents
-        .filter(file => {
-          return this.validFile.test(file);
-        })
-        .forEach(file => {
-          this.loadScript(`${thispath}/${file}`);
-        });
+      let valids = contents.filter((file) => {
+        return this.validFile.test(file);
+      });
+      for (let index in valids)
+        await this.loadScript(`${thispath}/${valids[index]}`);
     },
     replaceSpyVariables(str) {
-      Object.keys(spy).forEach(key => {
+      Object.keys(spy).forEach((key) => {
         let rx = new RegExp(`\\[${key}\\]`);
         if (rx.test(str)) str = str.replace(rx, spy[key]);
       });
@@ -260,35 +300,48 @@ export default {
     consoler(msg) {
       // Catches all console.log() usage in .jsx files via CSEvent
       console.log(`${spy.appName}: ${msg.data}`);
-    }
-  }
+    },
+    setCSS(prop, data) {
+      // Sets value of CSS variable
+      // prop == typeof String as name of variable, with or without leading dashes:
+      // this.setCSS('color-bg', 'rgba(25,25,25,1)') || this.setCSS('--scrollbar-width', '20px')
+      document.documentElement.style.setProperty(
+        `${/^\-\-/.test(prop) ? prop : "--" + prop}`,
+        data
+      );
+    },
+  },
 };
 </script>
 
-  <style>
+<style>
 /* Various helper styles to match host application's theme */
-@import url("https://fonts.googleapis.com/css?family=Open+Sans&display=swap");
+/* @import url("https://fonts.googleapis.com/css?family=Open+Sans&display=swap"); */
 :root {
   --quad: cubic-bezier(0.48, 0.04, 0.52, 0.96);
   --quart: cubic-bezier(0.76, 0, 0.24, 1);
   --quint: cubic-bezier(0.84, 0, 0.16, 1);
-
+  --font-size: 10px;
+  --highlight-bg: #b4d7fd;
+  --highlight-text: #161616;
   background-color: var(--color-bg);
   color: var(--default-color);
   font-family: "Open Sans", sans-serif;
-  font-size: 10px;
 }
 body {
   margin: 0px;
+  overflow: hidden;
 }
 
 .panel {
   position: relative;
   box-sizing: border-box;
   padding: 8px;
-  height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
+  user-select: none;
+  cursor: default;
+  font-size: var(--font-size);
 }
 .fold:first-of-type {
   border-top: solid 1px transparent !important;
