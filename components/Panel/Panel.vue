@@ -45,8 +45,8 @@ export default {
     },
     fontSize: {
       type: String,
-      default: '10px';
-    }
+      default: "10px",
+    },
   },
   data: () => ({
     validFile: /\.js(x(bin)?|(fl))?$/,
@@ -129,7 +129,7 @@ export default {
     window.addEventListener("resize", () => {
       this.checkSize();
     });
-    this.setCSS('--font-size', this.fontSize);
+    this.setCSS("--font-size", this.fontSize);
   },
   methods: {
     checkSize() {
