@@ -17,55 +17,54 @@ export default {
   props: {
     utils: {
       type: [String, Array],
-      default: "./src/host/universal/",
+      default: "./src/host/universal/"
     },
     scriptPath: {
       type: [String, Array],
-      default: "./src/host/[appName]",
+      default: "./src/host/[appName]"
     },
     exclude: {
       type: [String, Array],
-      default: "",
+      default: ""
     },
     noUtils: {
       type: Boolean,
-      default: false,
+      default: false
+    },
+    debug: {
+      type: Boolean,
+      default: false
     },
     app: {
       type: String,
-      default: "AEFT",
+      default: "AEFT"
     },
     theme: {
       type: String,
-      default: "gradient",
+      default: "gradient"
     },
     gradient: {
       type: String,
-      default: "",
-    },
-    fontSize: {
-      type: String,
-      default: "10px",
-    },
+      default: ""
+    }
   },
   data: () => ({
     validFile: /\.js(x(bin)?|(fl))?$/,
     themeForcer: null,
-    debug: false,
-    csInterface: null,
+    csInterface: null
   }),
   computed: {
     realUtils() {
       return typeof this.utils === "string"
         ? this.sanitizeString(this.utils)
-        : this.utils.map((util) => {
+        : this.utils.map(util => {
             this.sanitizeString(util);
           });
     },
     realScriptPath() {
       return typeof this.scriptPath === "string"
         ? this.sanitizeString(this.scriptPath)
-        : this.scriptPath.map((script) => {
+        : this.scriptPath.map(script => {
             this.sanitizeString(script);
           });
     },
@@ -78,12 +77,12 @@ export default {
         ? new RegExp(this.exclude)
         : new RegExp(
             `${this.exclude
-              .map((item) => {
+              .map(item => {
                 return escape(item);
               })
               .join("|")}`
           );
-    },
+    }
   },
   created() {
     window.localStorage.setItem("starletteActive", false);
@@ -91,7 +90,7 @@ export default {
   },
   async mounted() {
     if (spy) {
-      console.clear();
+      if (!this.debug) console.clear();
       console.log(
         `${spy.extName} ${spy.extVersion} : ${spy.isDev ? "DEV" : "BUILD"}`
       );
@@ -104,7 +103,7 @@ export default {
     // dont redirect if file dropped
     window.addEventListener(
       "dragover",
-      function (e) {
+      function(e) {
         e = e || event;
         e.preventDefault();
       },
@@ -112,7 +111,7 @@ export default {
     );
     window.addEventListener(
       "drop",
-      function (e) {
+      function(e) {
         e = e || event;
         e.preventDefault();
       },
@@ -129,7 +128,6 @@ export default {
     window.addEventListener("resize", () => {
       this.checkSize();
     });
-    this.setCSS("--font-size", this.fontSize);
   },
   methods: {
     checkSize() {
@@ -245,7 +243,7 @@ export default {
         ? null
         : typeof this.realUtils === "string"
         ? await this.handlePath(this.realUtils)
-        : this.realUtils.forEach((util) => {
+        : this.realUtils.forEach(util => {
             this.handlePath(util);
           });
     },
@@ -284,14 +282,14 @@ export default {
     },
     async loadFolder(thispath) {
       let contents = await this.readDir(thispath);
-      let valids = contents.filter((file) => {
+      let valids = contents.filter(file => {
         return this.validFile.test(file);
       });
       for (let index in valids)
         await this.loadScript(`${thispath}/${valids[index]}`);
     },
     replaceSpyVariables(str) {
-      Object.keys(spy).forEach((key) => {
+      Object.keys(spy).forEach(key => {
         let rx = new RegExp(`\\[${key}\\]`);
         if (rx.test(str)) str = str.replace(rx, spy[key]);
       });
@@ -309,8 +307,8 @@ export default {
         `${/^\-\-/.test(prop) ? prop : "--" + prop}`,
         data
       );
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -331,6 +329,14 @@ export default {
 body {
   margin: 0px;
   overflow: hidden;
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: "Open Sans", monospace;
+  font-size: 12px;
 }
 
 .panel {
